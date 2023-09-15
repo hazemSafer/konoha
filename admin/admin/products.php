@@ -48,17 +48,22 @@ if (isset($_POST['add_product'])) {
 }
 
 if (isset($_GET['delete'])) {
-    echo "heello";
-    $delete_id = $_GET['delete'];
-    $delete_product_image = $conn->prepare("SELECT * FROM `products` WHERE id = ?");
-    $delete_product_image->execute([$delete_id]);
-    $fetch_delete_image = $delete_product_image->fetch(PDO::FETCH_ASSOC);
-    unlink('../../images/' . $fetch_delete_image['image']);
-    $delete_product = $conn->prepare("DELETE FROM `products` WHERE id = ?");
-    $delete_product->execute([$delete_id]);
-    /*$delete_cart = $conn->prepare("DELETE FROM `cart` WHERE pid = ?");
-    $delete_cart->execute([$delete_id]);*/
-    header('location:products.php');
+   $delete_id = $_GET['delete'];
+   $delete_product_image = $conn->prepare("SELECT * FROM products WHERE id = ?");
+   $delete_product_image->execute([$delete_id]);
+   $fetch_delete_image = $delete_product_image->fetch(PDO::FETCH_ASSOC);
+   unlink('../../images/' . $fetch_delete_image['image']);
+
+   // Delete the associated rows from the order_products table
+   $delete_order_products = $conn->prepare("DELETE FROM order_products WHERE product_id = ?");
+   $delete_order_products->execute([$delete_id]);
+
+   $delete_product = $conn->prepare("DELETE FROM products WHERE id = ?");
+   $delete_product->execute([$delete_id]);
+
+   
+   $message[] = 'Product Deleted!';
+   header('location:products.php');
 
 }
 
@@ -93,13 +98,13 @@ if (isset($_GET['delete'])) {
       <input type="number" min="0" max="9999999999" required placeholder="enter product price" name="price" onkeypress="if(this.value.length == 10) return false;" class="box">
       <select name="category" class="box" required>
          <option value="" disabled selected>select category --</option>
-         <option value="desserts">Top Dishes</option>
+         <option value="Top Dishes">Top Dishes</option>
          <option value="main dish">main dish</option>
          <option value="fast food">fast food</option>
-         <option value="desserts">Small Plates</option>
+         <option value="Small Plates">Small Plates</option>
          <option value="drinks">drinks</option>
          <option value="desserts">desserts</option>
-         <option value="desserts">salads</option>
+         <option value="salads">salads</option>
       </select>
       <input type="file" name="image" class="box" accept="image/jpg, image/jpeg, image/png, image/webp" required>
       <input type="submit" value="add product" name="add_product" class="btn">

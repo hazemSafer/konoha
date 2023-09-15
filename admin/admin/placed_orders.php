@@ -22,12 +22,17 @@ if (isset($_POST['update_payment'])) {
 }
 
 if (isset($_GET['delete'])) {
-    $delete_id = $_GET['delete'];
-    $delete_order = $conn->prepare("DELETE FROM `orders` WHERE id = ?");
-    $delete_order->execute([$delete_id]);
-    header('location:placed_orders.php');
-}
+   $delete_id = $_GET['delete'];
 
+   // Delete the associated rows from the order_products table
+   $delete_order_products = $conn->prepare("DELETE FROM order_products WHERE order_id = ?");
+   $delete_order_products->execute([$delete_id]);
+
+   $delete_order = $conn->prepare("DELETE FROM orders WHERE id = ?");
+   $delete_order->execute([$delete_id]);
+   $message[] = 'Order Deleted!';
+   header('location:placed_orders.php');
+}
 ?>
 
 <!DOCTYPE html>
